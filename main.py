@@ -7,9 +7,9 @@ from sentence_transformers import SentenceTransformer
 import faiss
 from google import genai
 
-# =========================
+
 # CONFIG API
-# =========================
+
 load_dotenv()
 API_KEY = os.getenv("GENAI_API_KEY")
 
@@ -18,20 +18,20 @@ if not API_KEY:
 
 client = genai.Client(api_key=API_KEY)
 
-# =========================
+
 # MODELO EMBEDDINGS
-# =========================
+
 embed_model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# =========================
+
 # VARIABLES GLOBALES
-# =========================
+
 chunks = []
 index = None
 
-# =========================
+
 # SYSTEM PROMPT
-# =========================
+
 SYSTEM_PROMPT = """
 Eres un Tutor Socrático experto en Bases de Datos.
 
@@ -41,9 +41,8 @@ Reglas:
 - Usa SOLO el contexto proporcionado
 """
 
-# =========================
 # LEER PDF
-# =========================
+
 def load_pdf(file):
     reader = PdfReader(file.name)
     text = ""
@@ -54,9 +53,9 @@ def load_pdf(file):
 
     return text
 
-# =========================
+
 # CHUNKING
-# =========================
+
 def chunk_text(text, chunk_size=150, overlap=30):
     words = text.split()
     result = []
@@ -69,9 +68,9 @@ def chunk_text(text, chunk_size=150, overlap=30):
 
     return result
 
-# =========================
+
 # CREAR VECTOR STORE
-# =========================
+
 def process_pdf(file):
 
     global chunks, index
@@ -85,11 +84,11 @@ def process_pdf(file):
     index = faiss.IndexFlatL2(dimension)
     index.add(np.array(embeddings))
 
-    return f"✅ PDF procesado: {len(chunks)} chunks creados"
+    return f" PDF procesado: {len(chunks)} chunks creados"
 
-# =========================
+
 # RETRIEVE
-# =========================
+
 def retrieve(query, k=3):
 
     global index, chunks
@@ -103,9 +102,9 @@ def retrieve(query, k=3):
     results = [chunks[i] for i in indices[0]]
     return "\n".join(results)
 
-# =========================
+
 # CHAT
-# =========================
+
 def chat(user_input, history):
 
     context = retrieve(user_input)
@@ -135,9 +134,9 @@ def chat(user_input, history):
 
     return reply
 
-# =========================
+
 # INTERFAZ
-# =========================
+
 with gr.Blocks() as demo:
 
     gr.Markdown("# 🤖 RAG Tutor con PDFs")
@@ -151,8 +150,8 @@ with gr.Blocks() as demo:
 
     load_btn.click(fn=process_pdf, inputs=file_input, outputs=status)
 
-# =========================
+
 # RUN
-# =========================
+
 if __name__ == "__main__":
     demo.launch()
